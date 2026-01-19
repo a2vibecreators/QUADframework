@@ -596,6 +596,113 @@ git push
 
 ---
 
+## 🆕 SQUAD-PMS Equity System Patents (NEW!)
+
+**Status:** 📋 **Documentation Phase** - Ready for Provisional Filing
+
+### Patent Portfolio Summary
+
+SQUAD-PMS introduces a **separate, complementary patent portfolio** focused on fair equity distribution in project management.
+
+| Aspect | QUAD AI Patents | SQUAD-PMS Equity Patents |
+|--------|-----------------|-------------------------|
+| **Focus** | Code generation compliance | Equity distribution fairness |
+| **Filings** | 2 provisionals (63/956,810, 63/957,071) | Preparing first provisional |
+| **Claims** | 30 total (23 + 7) | 6-10 (planned) |
+| **Innovation** | AI generating compliant code | Automated fair equity calculation |
+| **Market** | $1.5T software development | $600M+ startup equity market |
+| **Value** | $1B-$5B | $100M-$500M |
+
+### Core Innovations (SQUAD-PMS)
+
+1. **51/49 Founder/Performance Split** - Fixed founder stake + dynamic pool
+2. **Complexity-Based Multiplier** - Hours × (complexity/10), capped at 3x
+3. **Fair Time Policy** - Automatic detection of unrealistic claims (10x faster)
+4. **Skill-Based Normalization** - Adjust for proficiency differences
+5. **Role-Based Visibility** - Privacy-aware equity transparency
+
+### Documentation Files
+
+| File | Purpose | Status |
+|------|---------|--------|
+| **PRIOR-ART-ANALYSIS-SQUAD-PMS.md** | Competitive research (ClickUp vs. Decisions.com) | ✅ Complete |
+| **PATENT-STRATEGY-SQUAD-PMS-EQUITY.md** | Filing strategy and timeline | ✅ Complete |
+| **COMPETITOR-COMPARISON-MATRIX.md** | Feature-by-feature comparison | ✅ Complete |
+
+### Key Findings from Prior Art Analysis
+
+**Novelty Assessment: ✅ DEFENSIBLE**
+
+- ✅ **51/49 Split**: Novel - Not in any competitor
+- ✅ **Complexity Multiplier**: Novel - Unique weighting algorithm
+- ✅ **Fair Time Policy**: Novel - Automatic fraud detection
+- ✅ **Skill Normalization**: Novel - Beyond scope of competitors
+- ✅ **Combined System**: Novel - Whole > sum of parts
+
+**Competitor Threat Level: 🟢 LOW**
+- ClickUp unlikely to add (outside core business, conflicts with SaaS model)
+- Decisions.com unlikely to add (different market, different expertise)
+- New entrant would face patent infringement risk
+
+### Patent Filing Timeline (SQUAD-PMS)
+
+| Timeline | Action | Status |
+|----------|--------|--------|
+| **Jan 2026** | Documentation phase | ✅ Complete |
+| **Q1 2026** | Deploy MVP to beta customers | ⏳ In Progress |
+| **Q2 2026** | Hire patent attorney | ⏳ Pending |
+| **Q3 2026** | Prior art search + specification | ⏳ Pending |
+| **Q4 2026** | File provisional patent | ⏳ Pending |
+| **Jan 2027** | Convert to non-provisional (deadline: Jan 9, 2027 for QUAD AI) | ⏳ Pending |
+| **2028-2029** | Patent grant expected | ⏳ Pending |
+
+### Market Opportunity
+
+**SQUAD-PMS Equity System TAM:**
+- 600,000+ startups in US
+- 200,000+ startups with 5+ employees
+- 50,000 target market (fair-equity focused)
+- Average: $1,000/month per company
+- **TAM: $600M/year** ($60M at 10% penetration)
+
+### Next Actions (SQUAD-PMS Patents)
+
+#### This Month (January 2026)
+- [ ] Review prior art analysis documents
+- [ ] Decide: File as separate provisional or combined application?
+- [ ] Assess MassMutual IP ownership (if applicable)
+
+#### Q1 2026 (By March 31)
+- [ ] Deploy SQUAD-PMS MVP with full equity features
+- [ ] Collect beta customer testimonials
+- [ ] Document commercialization evidence
+
+#### Q2 2026 (By June 30)
+- [ ] Initial patent attorney consultation
+- [ ] Determine if filing separate or combined with QUAD patents
+
+#### Q3 2026 (By September 30)
+- [ ] Conduct prior art search for SQUAD-PMS equity ($3-5K)
+- [ ] Draft provisional specification
+
+#### Q4 2026 (By December 31)
+- [ ] File provisional patent (before year-end)
+- [ ] Secure priority date
+
+### Related Reading
+
+**See SQUAD-PMS Patent Documents:**
+1. `PRIOR-ART-ANALYSIS-SQUAD-PMS.md` - Full competitive analysis
+2. `PATENT-STRATEGY-SQUAD-PMS-EQUITY.md` - Detailed filing strategy
+3. `COMPETITOR-COMPARISON-MATRIX.md` - Feature comparison table
+
+**See QUAD AI Patent Documents (existing):**
+1. `QUAD_PROVISIONAL_PATENT_APPLICATION.md` - QUAD AI specification
+2. `PATENT_PROTECTION_EXPLAINED.md` - How patents work
+3. `CAN_COMPETITORS_DESIGN_AROUND_PATENT.md` - Design-around analysis
+
+---
+
 ## ✅ What You've Accomplished
 
 🎉 **Filed 23 claims** protecting QUAD Platform's core innovations
