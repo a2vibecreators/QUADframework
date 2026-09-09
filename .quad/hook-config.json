@@ -1,0 +1,251 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "description": "QUAD Hook System - Intelligent conversation memory and context tracking",
+
+  "project": {
+    "name": "QUAD",
+    "domain": "software-development",
+    "rootPath": "/Users/semostudio/git/a2vibes/QUAD",
+    "description": "Quick Unified Agentic Development Framework"
+  },
+
+  "pauseDetection": {
+    "enabled": true,
+    "baseTimeout": 3000,
+    "adaptiveMode": true,
+    "learnFromPatterns": true,
+
+    "timeoutRange": {
+      "min": 1500,
+      "max": 5000
+    },
+
+    "userBehaviorAnalysis": {
+      "enabled": true,
+      "trackTypingSpeed": true,
+      "trackMessageLength": true,
+      "detectBurstPatterns": true,
+      "detectLongThoughts": true
+    },
+
+    "patterns": {
+      "shortBursts": {
+        "description": "User types 2-3 quick messages in succession",
+        "timeout": 1500,
+        "criteria": {
+          "messageCount": 3,
+          "timeWindow": 10000,
+          "avgMessageLength": 50
+        }
+      },
+      "longThoughts": {
+        "description": "User types long, detailed paragraphs",
+        "timeout": 5000,
+        "criteria": {
+          "avgMessageLength": 200,
+          "pauseBetweenMessages": 8000
+        }
+      },
+      "default": {
+        "timeout": 3000
+      }
+    },
+
+    "userCancellation": {
+      "enabled": true,
+      "description": "Allow users to cancel during pause window (saves tokens)",
+
+      "visualFeedback": {
+        "enabled": true,
+        "showCountdown": true,
+        "countdownFormat": "Processing in {seconds}s...",
+        "showPendingMessage": true,
+        "highlightColor": "#FFA500",
+        "pendingIcon": "⏱️"
+      },
+
+      "cancellationMethods": {
+        "buttonClick": {
+          "enabled": true,
+          "buttonText": "✕ Cancel",
+          "buttonPosition": "top-right"
+        },
+        "keyPress": {
+          "enabled": true,
+          "keys": ["Escape", "Delete", "Backspace"]
+        },
+        "commandText": {
+          "enabled": true,
+          "commands": ["/cancel", "STOP", "UNDO"]
+        }
+      },
+
+      "behavior": {
+        "clearBuffer": true,
+        "resetTimeout": true,
+        "preventAPICall": true,
+        "showConfirmation": false,
+        "confirmationMessage": "Message cancelled"
+      },
+
+      "logging": {
+        "enabled": true,
+        "logReason": true,
+        "useForPatternLearning": true,
+        "description": "Learn from cancellations (e.g., user cancels short messages → increase timeout)"
+      },
+
+      "tokenSavings": {
+        "trackCancellations": true,
+        "estimateSavingsPerCancellation": 500,
+        "description": "Estimate: Each cancellation saves ~500 tokens (no API call)"
+      }
+    }
+  },
+
+  "importanceScoring": {
+    "enabled": true,
+    "threshold": 5,
+    "scale": {
+      "min": 1,
+      "max": 10
+    },
+
+    "geminiConfig": {
+      "model": "gemini-2.0-flash-thinking-exp-1219",
+      "promptTemplate": "Rate importance (1-10) of this user input based on current work context.\n\nCurrent Project: {{project}}\nCurrent Work: {{currentWork}}\nUser Input: {{userInput}}\n\nConsider:\n- Relevance to current task\n- Decision-making impact\n- Long-term value\n- Technical complexity\n\nRespond with just a number 1-10."
+    },
+
+    "allowManualOverride": true,
+    "learnFromAdjustments": true,
+
+    "patternLearning": {
+      "enabled": true,
+      "storageTable": "quad_hook_importance_patterns",
+      "minSampleSize": 3,
+      "confidenceThreshold": 0.7
+    }
+  },
+
+  "memoryShelfLife": {
+    "strategy": "hard_expiration",
+
+    "durations": {
+      "high": 30,
+      "medium": 7,
+      "low": 1,
+      "unit": "days"
+    },
+
+    "importanceMapping": {
+      "high": [8, 9, 10],
+      "medium": [5, 6, 7],
+      "low": [1, 2, 3, 4]
+    },
+
+    "cleanup": {
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "deleteExpired": true
+    },
+
+    "roadmap": {
+      "fadingMemory": {
+        "enabled": false,
+        "description": "Phase 2: Human-like memory fading with Gemini summarization",
+        "fadeAfterDays": 30,
+        "fadeStrategy": "keep emotion and facts, lose specific details",
+        "summaryProvider": "gemini",
+        "deleteAfterDays": 90
+      }
+    }
+  },
+
+  "contextDetection": {
+    "enabled": true,
+    "mode": "auto",
+
+    "hierarchy": {
+      "priority": ["ticket", "project", "user"],
+      "weights": {
+        "ticket": 2.0,
+        "project": 1.0,
+        "user": 0.5
+      }
+    },
+
+    "ticket": {
+      "enabled": true,
+      "activeThresholdMinutes": 30,
+      "storageTable": "quad_tickets",
+      "commands": {
+        "start": "quad ticket start <ticket-id>",
+        "pause": "quad ticket pause",
+        "resume": "quad ticket resume <ticket-id>",
+        "stop": "quad ticket stop"
+      }
+    },
+
+    "project": {
+      "enabled": true,
+      "autoDetectFromPath": true,
+      "commands": {
+        "init": "quad init <project-name>",
+        "switch": "quad project switch <project-name>"
+      }
+    },
+
+    "contextSwitchDetection": {
+      "enabled": true,
+      "keywords": {
+        "newProject": ["switch to", "work on", "let's start"],
+        "newTicket": ["ticket", "bug", "issue", "feature"],
+        "resume": ["continue", "back to", "resume"]
+      }
+    }
+  },
+
+  "storage": {
+    "database": "postgresql",
+    "connectionString": "process.env.DATABASE_URL",
+    "tables": {
+      "memories": "quad_hook_memories",
+      "userPatterns": "quad_hook_user_patterns",
+      "importancePatterns": "quad_hook_importance_patterns",
+      "contextHistory": "quad_hook_context_history"
+    }
+  },
+
+  "tokenOptimization": {
+    "enabled": true,
+    "description": "Intelligent token usage optimization - PATENT PENDING",
+
+    "strategies": {
+      "smartSummarization": {
+        "enabled": true,
+        "description": "Summarize old memories to save tokens",
+        "triggerAfterDays": 7
+      },
+
+      "contextPruning": {
+        "enabled": true,
+        "description": "Remove irrelevant context from memory",
+        "maxContextSize": 10000
+      },
+
+      "hierarchicalMemory": {
+        "enabled": true,
+        "description": "Store memories in hierarchy for efficient retrieval",
+        "maxDepth": 5
+      }
+    }
+  },
+
+  "debugging": {
+    "enabled": false,
+    "logLevel": "info",
+    "logToFile": true,
+    "logFilePath": ".quad/logs/hooks.log"
+  }
+}

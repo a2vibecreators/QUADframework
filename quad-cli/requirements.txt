@@ -1,0 +1,23 @@
+# QUAD CLI Requirements
+# ======================
+
+# Core dependencies
+python-dotenv>=1.0.0
+click>=8.1.0
+
+# Database
+psycopg[binary]>=3.1.0
+
+# Excel parsing (for quad init)
+openpyxl>=3.1.0
+
+# AI Providers
+google-generativeai>=0.3.0  # Gemini API
+anthropic>=0.18.0           # Claude API
+
+# HTTP clients (for AI APIs)
+requests>=2.31.0
+httpx>=0.24.0
+
+# Utilities
+python-dateutil>=2.8.0

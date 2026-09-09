@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.tar.gz",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/gzip"
+          }
+        ]
+      },
+      {
+        "source": "/install.sh",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "text/plain; charset=utf-8"
+          }
+        ]
+      }
+    ]
+  }
+}

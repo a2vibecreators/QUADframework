@@ -4,6 +4,29 @@ This document defines 6 comprehensive test journeys for validating QUAD Framewor
 
 ---
 
+## Quick Start: Demo Journey
+
+For a quick demo of QUAD CLI on a fresh laptop, see the **[demo/](./journeys/demo/)** folder:
+
+| # | Document | Description | Time |
+|---|----------|-------------|------|
+| 0 | [00-PREREQUISITES.md](./journeys/demo/00-PREREQUISITES.md) | Install VS Code, Claude CLI, Python, Git | 15 min |
+| 1 | [01-INSTALLATION.md](./journeys/demo/01-INSTALLATION.md) | Install QUAD CLI and verify | 5 min |
+| 2 | [02-DEMO-WALKTHROUGH.md](./journeys/demo/02-DEMO-WALKTHROUGH.md) | Full demo: login → init → story → code → test → charts | 20 min |
+
+**Quick Commands:**
+```bash
+quad login --google        # Step 1
+quad init banking-portal   # Step 2
+cd banking-portal
+quad story create          # Step 3
+quad code generate         # Step 4
+quad test                  # Step 5
+quad burnout               # Step 6
+```
+
+---
+
 ## Journey Overview
 
 | # | Company Size | Journey Name | Tech Stack | Key QUAD Features |

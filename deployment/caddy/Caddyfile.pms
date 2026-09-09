@@ -1,0 +1,83 @@
+# ============================================================================
+# SQUAD PMS - Development & Production Caddy Configuration
+# ============================================================================
+# This file should be copied/merged into: /Users/semostudio/docker/caddy/Caddyfile
+#
+# Setup:
+#   1. Copy this file: cp deployment/caddy/Caddyfile.pms /Users/semostudio/docker/caddy/Caddyfile
+#   2. Or append to existing: cat deployment/caddy/Caddyfile.pms >> /Users/semostudio/docker/caddy/Caddyfile
+#   3. Restart Caddy: docker restart caddy
+#
+# DNS:
+#   - dev-pms.quadframe.work → 96.240.97.243 (Mac Studio IP - dev)
+#   - pms.quadframe.work → 96.240.97.243 (Mac Studio IP - production)
+#
+# ============================================================================
+
+# SQUAD PMS API - Development
+dev-pms.quadframe.work {
+    reverse_proxy suma-api:3201
+
+    # Enable compression
+    encode gzip zstd
+
+    # CORS headers for API
+    header {
+        # CORS - Allow all for dev
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With, X-API-Key"
+        Access-Control-Max-Age "86400"
+
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    respond @options 204
+
+    # Logging
+    log {
+        output file /var/log/caddy/dev-pms-access.log
+        format json
+    }
+}
+
+# SQUAD PMS API - Production
+pms.quadframe.work {
+    reverse_proxy suma-api:3201
+
+    # Enable compression
+    encode gzip zstd
+
+    # CORS headers for API
+    header {
+        # CORS - Restricted for production
+        Access-Control-Allow-Origin "https://pms.quadframe.work"
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With, X-API-Key"
+        Access-Control-Max-Age "86400"
+
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+
+    # Handle preflight requests
+    @options {
+        method OPTIONS
+    }
+    respond @options 204
+
+    # Logging
+    log {
+        output file /var/log/caddy/pms-access.log
+        format json
+    }
+}

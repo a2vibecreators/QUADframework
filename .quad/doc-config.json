@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "documentation_root": "documentation",
+  "structure": {
+    "getting-started": "documentation/getting-started",
+    "setup": "documentation/setup",
+    "methodology": "documentation/methodology",
+    "architecture": "documentation/architecture",
+    "api": "documentation/api",
+    "database": "documentation/database",
+    "testing": "documentation/testing",
+    "deployment": "documentation/deployment",
+    "security": "documentation/security",
+    "discussions": "documentation/discussions",
+    "implementation": "documentation/implementation",
+    "company": "documentation/company",
+    "domains": "documentation/domains",
+    "trademarks": "documentation/trademarks",
+    "patents": "documentation/patents",
+    "misc": "documentation/misc"
+  },
+  "rules": {
+    "file_naming": {
+      "standard": "<CATEGORY>-<NAME>.md",
+      "dated": "YYYY-MM-DD-<NAME>.md",
+      "discussion": "DISCUSSION-<NUMBER>-<TOPIC>.md",
+      "examples": [
+        "SYSTEM-ARCHITECTURE.md",
+        "2026-01-15-TEST-PLAN.md",
+        "DISCUSSION-1-CONTEXT-MEMORY.md"
+      ]
+    },
+    "required_files_root": [
+      "README.md",
+      "CLAUDE.md",
+      "BACKLOG.md",
+      "CHANGELOG.md",
+      "LICENSE.md"
+    ],
+    "required_files_doc": [
+      "README.md"
+    ],
+    "index_file": "documentation/README.md"
+  },
+  "validation": {
+    "check_broken_links": true,
+    "check_missing_readme": true,
+    "check_naming_convention": true,
+    "check_required_sections": true,
+    "required_sections": {
+      "architecture": ["Overview", "Technology Stack", "Components"],
+      "api": ["Overview", "Endpoints", "Authentication"],
+      "database": ["Overview", "Schema", "Tables"],
+      "testing": ["Overview", "Test Cases", "Success Criteria"]
+    }
+  },
+  "templates": {
+    "quad_defaults": "quad-cli/templates",
+    "org_templates": "~/.quad/templates/{org_code}",
+    "project_templates": ".quad/templates"
+  },
+  "auto_generation": {
+    "api_from_code": true,
+    "db_from_schema": true,
+    "test_from_stories": true,
+    "diagrams_from_code": false
+  }
+}

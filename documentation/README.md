@@ -1,15 +1,27 @@
 # QUAD Platform Documentation Index
 
-**Last Updated:** January 5, 2026
-**Total Documents:** 144+
+**Last Updated:** January 14, 2026
+**Total Documents:** 147+
 **Base Path:** `/documentation/`
 
 Welcome to QUAD Platform documentation! This index helps you navigate all available documentation organized by topic.
 
 ---
 
+## New Here? Choose Your Path
+
+| I want to... | You are a... | Setup Guide | Time |
+|--------------|--------------|-------------|------|
+| **Build apps using QUAD** | QUAD Developer | [QUAD_DEVELOPER_SETUP.md](setup/QUAD_DEVELOPER_SETUP.md) | 15 min |
+| **Build QUAD itself** | QUAD Contributor | [QUAD_CONTRIBUTOR_SETUP.md](setup/QUAD_CONTRIBUTOR_SETUP.md) | 30 min |
+
+**Not sure which one?** See [setup/README.md](setup/README.md) for a detailed comparison.
+
+---
+
 ## Table of Contents
 
+0. [Setup Guide](#new-here-choose-your-path)
 1. [Quick Start](#-quick-start)
 2. [Overview](#-overview)
 3. [Getting Started](#-getting-started)

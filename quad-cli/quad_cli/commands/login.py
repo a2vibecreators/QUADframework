@@ -3,200 +3,149 @@
 QUAD Login Command
 ==================
 
-Authenticate with QUAD via Anthropic or Enterprise SSO.
+Simple login for QUAD CLI.
 
 Usage:
-  quad login                  # Interactive selection
-  quad login -a               # Anthropic account
-  quad login -e MM            # Enterprise SSO (org code)
+  quad login                  # Interactive login
+  quad login --status         # Show current login
+  quad login --logout         # Logout
 
 Copyright (c) 2026 Gopi Suman Addanke. All Rights Reserved.
 """
 
 import sys
-import os
 import json
-import webbrowser
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
+from pathlib import Path
+from typing import Optional, Dict
 
-from quad_cli.utils.console import Console
-from quad_cli.utils.config import (
-    save_credentials,
-    load_credentials,
-    get_api_url,
-    get_config_dir,
-)
+# Config paths
+QUAD_CONFIG_DIR = Path.home() / ".quad"
+QUAD_CONFIG_FILE = QUAD_CONFIG_DIR / "config.json"
 
 
-def show_login_menu():
-    """Show login method selection menu"""
-    Console.header("QUAD Authentication")
+class Console:
+    """Simple console utilities"""
 
-    print("  [1] Anthropic Account")
-    print("      • Individual developers")
-    print("      • Use your Claude API quota")
-    print()
-    print("  [2] Enterprise SSO")
-    print("      • Corporate teams (MM, MM-WM, etc.)")
-    print("      • Company pays via QUAD billing")
-    print("      • SSO: Okta, Azure AD, Google")
-    print()
+    @staticmethod
+    def header(text: str):
+        print(f"\n  {text}")
+        print(f"  {'─' * len(text)}\n")
 
-    choice = Console.ask("Select", "1")
-    return choice
+    @staticmethod
+    def success(text: str):
+        print(f"  ✓ {text}")
+
+    @staticmethod
+    def info(text: str):
+        print(f"  → {text}")
+
+    @staticmethod
+    def error(text: str):
+        print(f"  ✗ {text}")
+
+    @staticmethod
+    def warn(text: str):
+        print(f"  ⚠ {text}")
+
+    @staticmethod
+    def ask(question: str, default: str = None) -> str:
+        if default:
+            prompt = f"  {question} [{default}]: "
+        else:
+            prompt = f"  {question}: "
+        answer = input(prompt).strip()
+        return answer if answer else default
 
 
-def login_anthropic():
-    """Login with Anthropic account"""
-    Console.header("Anthropic Login")
+def save_config(config: Dict):
+    """Save config to ~/.quad/config.json"""
+    QUAD_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    QUAD_CONFIG_FILE.write_text(json.dumps(config, indent=2))
 
-    # For now, just collect API key
-    # TODO: Implement OAuth flow with Anthropic
-    Console.info("Enter your Anthropic API key")
-    Console.info("Get one at: https://console.anthropic.com/settings/keys")
-    print()
 
-    api_key = Console.ask("API Key")
-    if not api_key:
-        Console.error("API key required")
+def load_config() -> Optional[Dict]:
+    """Load config from ~/.quad/config.json"""
+    if QUAD_CONFIG_FILE.exists():
+        try:
+            return json.loads(QUAD_CONFIG_FILE.read_text())
+        except:
+            return None
+    return None
+
+
+def login_simple():
+    """Simple login - just ask for name"""
+    Console.header("QUAD Login")
+
+    name = Console.ask("Your name")
+    if not name:
+        Console.error("Name required")
         return False
 
-    # Validate the key (basic check)
-    if not api_key.startswith("sk-ant-"):
-        Console.warn("Key doesn't look like an Anthropic key (should start with sk-ant-)")
-        if not Console.confirm("Continue anyway?", default=False):
-            return False
-
-    # Save credentials
-    credentials = {
-        "auth_type": "anthropic",
-        "api_key": api_key,
-        "created_at": datetime.now().isoformat(),
+    config = {
+        "user_name": name,
+        "logged_in_at": datetime.now().isoformat(),
     }
-    save_credentials(credentials)
+    save_config(config)
 
-    Console.success("Logged in with Anthropic account")
-    Console.info(f"Credentials saved to {get_config_dir() / 'credentials.json'}")
+    print()
+    Console.success(f"Welcome, {name}!")
+    Console.info(f"Config saved to: {QUAD_CONFIG_FILE}")
     return True
 
 
-def login_enterprise(org_code: str):
-    """Login with Enterprise SSO"""
-    Console.header(f"Enterprise Login: {org_code}")
+def show_current_login():
+    """Show current login status"""
+    config = load_config()
 
-    # Lookup org configuration from API
-    import urllib.request
-    import urllib.error
+    Console.header("Current Login")
 
-    api_url = get_api_url()
-    lookup_url = f"{api_url}/auth/org/{org_code}"
+    if not config:
+        Console.warn("Not logged in")
+        Console.info("Run: quad login")
+        return
 
-    Console.info(f"Looking up organization: {org_code}")
+    if config.get("user_name"):
+        Console.info(f"User: {config['user_name']}")
+    if config.get("logged_in_at"):
+        Console.info(f"Since: {config['logged_in_at'][:10]}")
 
-    try:
-        req = urllib.request.Request(lookup_url)
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = json.loads(response.read().decode())
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            Console.error(f"Organization not found: {org_code}")
-            Console.info("Contact your admin to register your organization")
-        else:
-            Console.error(f"API error: {e.code}")
-        return False
-    except Exception as e:
-        Console.error(f"Failed to connect to QUAD API: {e}")
-        Console.info("Using offline mode...")
-        # For demo, allow offline enterprise login
-        data = {
-            "org_code": org_code,
-            "sso_provider": "demo",
-            "auth_url": None
-        }
 
-    org_name = data.get("org_name", org_code)
-    sso_provider = data.get("sso_provider", "unknown")
-    auth_url = data.get("auth_url")
+def logout():
+    """Logout - remove config"""
+    Console.header("QUAD Logout")
 
-    Console.info(f"Organization: {org_name}")
-    Console.info(f"SSO Provider: {sso_provider}")
-
-    if auth_url:
-        Console.info("Opening browser for SSO login...")
-        webbrowser.open(auth_url)
-        Console.info("Complete login in browser, then return here")
-
-        # Wait for callback or manual token entry
-        token = Console.ask("Enter token from browser (or press Enter to skip)")
+    if QUAD_CONFIG_FILE.exists():
+        QUAD_CONFIG_FILE.unlink()
+        Console.success("Logged out successfully")
     else:
-        # Demo mode - generate a mock token
-        Console.info("Demo mode - generating temporary token")
-        token = f"quad_demo_{org_code}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-
-    if not token:
-        Console.warn("Login cancelled")
-        return False
-
-    # Save credentials
-    credentials = {
-        "auth_type": "enterprise",
-        "org_code": org_code,
-        "org_name": org_name,
-        "sso_provider": sso_provider,
-        "token": token,
-        "created_at": datetime.now().isoformat(),
-        "expires_at": (datetime.now() + timedelta(hours=8)).isoformat(),
-    }
-    save_credentials(credentials)
-
-    Console.success(f"Logged in to {org_name}")
-    Console.info(f"Token expires: {credentials['expires_at']}")
-    return True
+        Console.info("Not logged in")
 
 
-def run_login(anthropic: bool = False, enterprise: str = None):
-    """Entry point for CLI integration.
+def run_login(status: bool = False, do_logout: bool = False, **kwargs):
+    """Entry point for CLI integration"""
 
-    Args:
-        anthropic: If True, login with Anthropic account
-        enterprise: Org code for Enterprise SSO login
-    """
-    if enterprise:
-        login_enterprise(enterprise)
-    elif anthropic:
-        login_anthropic()
+    if do_logout:
+        logout()
+    elif status:
+        show_current_login()
     else:
-        # Interactive menu
-        choice = show_login_menu()
-        if choice == "1":
-            login_anthropic()
-        elif choice == "2":
-            org_code = Console.ask("Organization code (e.g., MM, MM-WM)")
-            if org_code:
-                login_enterprise(org_code)
-            else:
-                Console.error("Organization code required")
-        else:
-            Console.error("Invalid selection")
+        login_simple()
 
 
 def main():
     """Command-line entry point"""
     if len(sys.argv) > 1:
         arg = sys.argv[1]
-        if arg in ("-a", "--anthropic"):
-            run_login(anthropic=True)
-        elif arg in ("-e", "--enterprise"):
-            if len(sys.argv) > 2:
-                run_login(enterprise=sys.argv[2])
-            else:
-                Console.error("Organization code required: quad-login -e ORG")
+        if arg in ("-s", "--status", "status"):
+            run_login(status=True)
+        elif arg in ("logout", "--logout"):
+            run_login(do_logout=True)
         elif arg in ("-h", "--help"):
             print(__doc__)
         else:
-            # Assume it's an org code
-            run_login(enterprise=arg)
+            run_login()
     else:
         run_login()
 

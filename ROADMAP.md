@@ -12,66 +12,141 @@ Build a platform where **anyone can create AI agents visually** - describe in En
 
 ---
 
-## Phases Overview
+## Phases Overview (5 Phases)
 
 ```
-Phase 1 (Current)     Phase 2              Phase 3              Phase 4
-─────────────────     ─────────────────    ─────────────────    ─────────────────
-CLI + Hooks           API + Runtime        QUAD Studio          Enterprise
-                                           (Visual Designer)
-Jan 2026              Feb-Mar 2026         Apr-Jun 2026         Jul+ 2026
+Phase 1 (Current)     Phase 2              Phase 3              Phase 4              Phase 5
+─────────────────     ─────────────────    ─────────────────    ─────────────────    ─────────────────
+CLI + Demo            API + AI             Website              QUAD Plugin          Full Product
+                                           (quadframe.work)     (VS Code)            (QUAD Editor)
+Jan 2026              Feb-Mar 2026         Mar-Apr 2026         May-Jun 2026         Jul+ 2026
 ```
 
 ---
 
-## Phase 1: Foundation (January 2026) ✅
+## Phase 1: CLI + Demo (January 2026) 🔄
 
 **Status:** In Progress
+**Goal:** Working CLI commands for full demo flow
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Phase 1: Pure CLI (No AI on api.quadframe.work yet)           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TERMINAL                        CLAUDE CLI                     │
+│  ────────                        ──────────                     │
+│  $ quad login                    $ claude                       │
+│  $ quad init                     > "help me..."                 │
+│  $ quad story                          │                        │
+│  $ quad code                           │                        │
+│  $ quad test                           ▼                        │
+│  $ quad deploy                   ┌──────────┐                   │
+│  $ quad burnout                  │ QUAD Hook│ (context inject)  │
+│  $ quad chart                    └──────────┘                   │
+│        │                               │                        │
+│        │                               │                        │
+│        ▼                               ▼                        │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  api.quadframe.work (No AI - just data storage)          │  │
+│  │  - User/Org management                                    │  │
+│  │  - Project storage                                        │  │
+│  │  - Ticket tracking                                        │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│  AI comes from: Claude CLI (Anthropic's tool)                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### Deliverables
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| quad-cli | ✅ Done | CLI commands (init, login, question, deploy) |
-| quad-agents | ✅ Done | QUADAgent base class |
-| quad-api | 🔄 Building | Flask API server |
-| Claude Hook | ✅ Done | Context injection for Claude Code |
+| quad-cli | 🔄 Building | CLI commands (login, init, story, code, test, deploy) |
+| quad-hook | ✅ Done | Context injection for Claude Code |
 | Database | ✅ Done | PostgreSQL schema on Cloud SQL |
+| Downloads | ✅ Done | downloads.quadframe.work (install.sh) |
+
+### Commands for Demo
+
+| Command | Status | Description |
+|---------|--------|-------------|
+| `quad login` | 🔄 Building | Google SSO authentication |
+| `quad init` | 🔧 Fix | Create project + docs structure |
+| `quad story create` | 📋 Planned | Generate user stories with PGCE |
+| `quad code generate` | 📋 Planned | Generate code from stories |
+| `quad test` | 📋 Planned | Run tests on generated code |
+| `quad deploy` | ✅ Done | Deploy to GCP |
+| `quad burnout` | 📋 Planned | Team burnout analysis |
+| `quad chart` | 📋 Planned | Sprint velocity charts |
 
 ### Key Features
-- `quad init` - Initialize projects from Excel
-- `quad login` - Anthropic + Enterprise SSO auth
-- `quad question` - Ask with org context
+- `quad login` - Google SSO (opens browser, callback to CLI)
+- `quad init` - Create project with standardized docs structure
+- `quad story` - AI generates prioritized user stories (PGCE)
+- `quad code` - AI generates production code (PGCE engine)
 - Context hook for Claude Code integration
-- QUADAgent base class with self-healing
 
 ---
 
-## Phase 2: API & Runtime (February-March 2026)
+## Phase 2: API + AI (February-March 2026)
 
 **Status:** Planned
+**Goal:** Add AI capabilities to api.quadframe.work
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Phase 2: API with AI Channel                                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TERMINAL                        api.quadframe.work             │
+│  ────────                        ─────────────────              │
+│  $ quad login ──────────────────▶ /api/auth/login              │
+│  $ quad story ──────────────────▶ /api/story/generate          │
+│  $ quad code  ──────────────────▶ /api/code/generate           │
+│                                         │                       │
+│                                         ▼                       │
+│                                  ┌──────────────┐               │
+│                                  │  AI Channel  │               │
+│                                  │  - Claude    │               │
+│                                  │  - Gemini    │               │
+│                                  │  - OpenAI    │               │
+│                                  └──────────────┘               │
+│                                                                 │
+│  Now API does the AI work (not just Claude CLI)                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### Deliverables
 
 | Component | Description |
 |-----------|-------------|
 | QUAD API v1 | REST API at api.quadframe.work |
+| AI Channel | Multi-provider AI (Claude/Gemini/OpenAI) |
 | Agent Registry | Store and discover agents |
 | Agent Executor | Run agents with lifecycle management |
 | QUAD WIRE | Agent-to-agent routing |
-| Health Monitor | Heartbeat and metrics collection |
 
 ### API Endpoints
 
 ```
+POST /api/auth/login          - SSO login
+POST /api/auth/me             - Get current user
+POST /api/story/generate      - Generate stories with AI
+POST /api/code/generate       - Generate code with AI (PGCE)
+POST /api/context             - Get org context
 POST /api/agents/register     - Register new agent
 POST /api/agents/execute      - Execute agent
 GET  /api/agents/{id}/health  - Health check
-POST /api/context             - Get org context
-POST /api/generate            - Generate code from English
 ```
 
-### Agent Lifecycle Implementation
+### Agent Lifecycle
 
 ```python
 class QUADAgent:
@@ -92,9 +167,73 @@ class QUADAgent:
 
 ---
 
-## Phase 3: QUAD Studio - Visual Agent Designer (April-June 2026)
+## Phase 3: Website (March-April 2026)
 
 **Status:** Planned
+**Goal:** Beautiful web UI at quadframe.work
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Phase 3: quadframe.work Web UI                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Browser: quadframe.work                                        │
+│  ──────────────────────                                         │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Dashboard                                               │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │   │
+│  │  │ Projects │ │ Stories  │ │ Tickets  │ │ Burnout  │   │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │   │
+│  │                                                         │   │
+│  │  Sprint Velocity                                        │   │
+│  │  ████████████████████ 42 pts                           │   │
+│  │  ██████████████████░░ 38 pts                           │   │
+│  │                                                         │   │
+│  │  Team Workload                                          │   │
+│  │  Pradeep ████████░░ 80%                                │   │
+│  │  Manju   ██████░░░░ 60%                                │   │
+│  │  Suman   █████░░░░░ 50%                                │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  Technology: Next.js + Tailwind                                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| Dashboard | Project overview, recent activity |
+| Projects | List/create projects |
+| Stories | View generated stories, PGCE priority |
+| Tickets | Ticket management, assignment |
+| Burnout | Team health visualization |
+| Charts | Velocity, capacity, trends |
+| Settings | User/org configuration |
+
+### Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page |
+| `/login` | Google SSO |
+| `/dashboard` | Main dashboard |
+| `/projects` | Project list |
+| `/projects/:id` | Project details |
+| `/stories` | Story board |
+| `/tickets` | Ticket list |
+| `/burnout` | Team health |
+| `/settings` | Settings |
+
+---
+
+## Phase 4: QUAD Plugin - VS Code Extension (May-June 2026)
+
+**Status:** Planned
+**Goal:** Standalone VS Code extension with AI-agnostic backend
 
 ### Vision
 
@@ -346,9 +485,19 @@ class ParseExcelAgent(QUADAgent):
 
 ---
 
-## Phase 4: Enterprise Features (July 2026+)
+## Phase 5: Full Product - QUAD Editor (July 2026+)
 
 **Status:** Future
+**Goal:** Standalone QUAD Editor (like WebStorm, but for agents)
+
+### Vision
+
+Own editor with:
+- Full IDE experience (not just VS Code extension)
+- Built-in AI chat (Claude/Gemini/OpenAI selectable)
+- Visual agent designer
+- Integrated deployment
+- Team collaboration
 
 ### Planned Features
 
@@ -432,19 +581,19 @@ class ParseExcelAgent(QUADAgent):
 Jan         Feb         Mar         Apr         May         Jun
  │           │           │           │           │           │
  ▼           ▼           ▼           ▼           ▼           ▼
-┌─────────┐ ┌─────────────────────┐ ┌───────────────────────────────┐
-│ Phase 1 │ │      Phase 2        │ │          Phase 3              │
-│ CLI +   │ │   API + Runtime     │ │    QUAD Studio (VS Code)      │
-│ Hooks   │ │                     │ │    Visual Agent Designer      │
-└─────────┘ └─────────────────────┘ └───────────────────────────────┘
-    ✅              🔄                           📅
+┌─────────┐ ┌───────────────────┐ ┌───────────┐ ┌───────────────────┐
+│ Phase 1 │ │     Phase 2       │ │  Phase 3  │ │     Phase 4       │
+│ CLI +   │ │   API + AI        │ │  Website  │ │   QUAD Plugin     │
+│ Demo    │ │  (multi-provider) │ │  (Next.js)│ │   (VS Code)       │
+└─────────┘ └───────────────────┘ └───────────┘ └───────────────────┘
+    🔄              📅                 📅               📅
 
 Jul         Aug         Sep         Oct         Nov         Dec
  │           │           │           │           │           │
  ▼           ▼           ▼           ▼           ▼           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Phase 4                                  │
-│              Enterprise Features + Marketplace                   │
+│                         Phase 5                                  │
+│              Full Product - QUAD Editor + Marketplace            │
 └─────────────────────────────────────────────────────────────────┘
                               📅
 ```

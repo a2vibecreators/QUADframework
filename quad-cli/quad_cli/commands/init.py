@@ -1125,26 +1125,33 @@ def main():
     init.run()
 
 
-def run_init(excel_file: str = None, resume: str = None, interactive: bool = False):
+def run_init(project_name: str = None, excel_file: str = None, resume: str = None, interactive: bool = False):
     """Entry point for CLI integration.
 
     Args:
+        project_name: Name of project to create (e.g., 'banking-portal')
         excel_file: Path to Excel file (with or without @ prefix)
         resume: Name of draft to resume
         interactive: Force interactive mode
     """
+    # Simple mode: quad init <project-name>
+    if project_name and not project_name.startswith('@'):
+        run_init_simple(project_name)
+        return
+
     if resume:
         init = QuadInteractiveInit(resume_draft=resume)
         init.run()
         return
 
-    if interactive or not excel_file:
+    if interactive or (not excel_file and not project_name):
         init = QuadInteractiveInit()
         init.run()
         return
 
     # Excel file mode
-    filepath = excel_file[1:] if excel_file.startswith('@') else excel_file
+    filepath = (project_name or excel_file)
+    filepath = filepath[1:] if filepath.startswith('@') else filepath
 
     if not HAS_OPENPYXL:
         Console.error("openpyxl not installed for Excel mode")
@@ -1158,6 +1165,330 @@ def run_init(excel_file: str = None, resume: str = None, interactive: bool = Fal
 
     init = QuadInit(filepath)
     init.run()
+
+
+# ─────────────────────────────────────────────────────────────
+# Simple Init (for demo)
+# ─────────────────────────────────────────────────────────────
+
+# Documentation folders as per DOCUMENTATION-STANDARDS.md
+DOC_FOLDERS = [
+    'architecture',
+    'database',
+    'api',
+    'web',
+    'mobile',
+    'deployment',
+    'security',
+    'testing',
+    'misc'
+]
+
+def run_init_simple(project_name: str):
+    """Simple project initialization for demo.
+
+    Usage: quad init <project-name>
+
+    Creates:
+    - <project-name>/
+    - <project-name>/.quad/config.json
+    - <project-name>/README.md
+    - <project-name>/CLAUDE.md
+    - <project-name>/documentation/*/README.md
+    """
+    Console.header("QUAD Project Initialization")
+
+    # === HOOK INTEGRATION START ===
+    from quad_cli.hooks import get_hook_manager
+
+    hook_manager = get_hook_manager()
+
+    command_args = {
+        "project_name": project_name
+    }
+
+    # PRE-HOOK: Capture and enrich context
+    pre_context = {}
+    try:
+        pre_context = hook_manager.pre_hook.execute("init", command_args)
+    except Exception as e:
+        print(f"  ⚠ Pre-hook warning: {e}")
+    # === HOOK INTEGRATION END ===
+
+    # Load global config to get org info
+    global_config = load_global_config()
+    if not global_config:
+        Console.error("Not logged in. Run: quad login")
+        return False
+
+    org_code = global_config.get('org_code', 'DEMO')
+    org_name = global_config.get('org_name', org_code)
+    user_email = global_config.get('user_email', 'user@example.com')
+
+    # Normalize project name
+    project_slug = project_name.lower().replace(' ', '-').replace('_', '-')
+
+    # Create project directory
+    project_dir = Path.cwd() / project_slug
+    if project_dir.exists():
+        Console.error(f"Directory already exists: {project_dir}")
+        if not Console.confirm("Overwrite existing files?", default=False):
+            return False
+
+    Console.info(f"Creating project: {project_slug}")
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    # Ask for project type
+    project_types = [
+        '[1] Web App',
+        '[2] API',
+        '[3] Mobile',
+        '[4] Full Stack'
+    ]
+    Console.info("Project type?")
+    for pt in project_types:
+        print(f"    {pt}")
+    type_choice = Console.ask("Select", "4")
+    project_type = {
+        '1': 'web',
+        '2': 'api',
+        '3': 'mobile',
+        '4': 'fullstack'
+    }.get(type_choice, 'fullstack')
+
+    # Ask for frontend (if web or fullstack)
+    frontend = 'none'
+    if project_type in ('web', 'fullstack'):
+        frontends = ['[1] Next.js', '[2] React', '[3] Vue']
+        Console.info("Frontend?")
+        for f in frontends:
+            print(f"    {f}")
+        fe_choice = Console.ask("Select", "1")
+        frontend = {'1': 'nextjs', '2': 'react', '3': 'vue'}.get(fe_choice, 'nextjs')
+
+    # Ask for backend (if api or fullstack)
+    backend = 'none'
+    if project_type in ('api', 'fullstack'):
+        backends = ['[1] Spring Boot', '[2] Node.js', '[3] Python']
+        Console.info("Backend?")
+        for b in backends:
+            print(f"    {b}")
+        be_choice = Console.ask("Select", "1")
+        backend = {'1': 'springboot', '2': 'nodejs', '3': 'python'}.get(be_choice, 'springboot')
+
+    # Ask for database
+    databases = ['[1] PostgreSQL', '[2] MySQL', '[3] MongoDB']
+    Console.info("Database?")
+    for d in databases:
+        print(f"    {d}")
+    db_choice = Console.ask("Select", "1")
+    database = {'1': 'postgresql', '2': 'mysql', '3': 'mongodb'}.get(db_choice, 'postgresql')
+
+    print()
+
+    # Create .quad/config.json
+    quad_dir = project_dir / ".quad"
+    quad_dir.mkdir(parents=True, exist_ok=True)
+
+    project_config = {
+        "domain_slug": project_slug,
+        "project_name": project_name,
+        "org_code": org_code,
+        "org_name": org_name,
+        "project_type": project_type,
+        "frontend": frontend,
+        "backend": backend,
+        "database": database,
+        "created_at": datetime.now().isoformat(),
+        "created_by": user_email,
+        "api_url": os.getenv("QUAD_API_URL", "https://api.quadframe.work")
+    }
+
+    config_file = quad_dir / "config.json"
+    config_file.write_text(json.dumps(project_config, indent=2))
+    Console.success(f"Created: {project_slug}/.quad/config.json")
+
+    # Create README.md
+    readme_content = f"""# {project_name}
+
+**Organization:** {org_name}
+**Created:** {datetime.now().strftime('%Y-%m-%d')}
+
+---
+
+## Overview
+
+{project_name} is a {project_type} project built with QUAD methodology.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | {frontend.title() if frontend != 'none' else 'N/A'} |
+| Backend | {backend.title() if backend != 'none' else 'N/A'} |
+| Database | {database.title()} |
+
+## Getting Started
+
+```bash
+# Development
+quad story create     # Generate user stories
+quad code generate    # Generate code
+quad test             # Run tests
+quad deploy dev       # Deploy to dev
+```
+
+## Documentation
+
+See [documentation/](documentation/) for detailed docs.
+
+---
+
+**Built with [QUAD](https://quadframe.work)**
+"""
+    readme_file = project_dir / "README.md"
+    readme_file.write_text(readme_content)
+    Console.success(f"Created: {project_slug}/README.md")
+
+    # Create CLAUDE.md
+    claude_content = f"""# {project_name} - AI Context
+
+**Organization:** {org_name} ({org_code})
+**Project:** {project_slug}
+**Type:** {project_type}
+
+---
+
+## Project Overview
+
+This is a {project_type} project for {org_name}.
+
+## Tech Stack
+
+- **Frontend:** {frontend.title() if frontend != 'none' else 'N/A'}
+- **Backend:** {backend.title() if backend != 'none' else 'N/A'}
+- **Database:** {database.title()}
+
+## Coding Standards
+
+Follow {org_name} coding standards:
+- Use TypeScript for frontend
+- Use standard project structure
+- Write tests for all new features
+- Document API endpoints
+
+## Project Structure
+
+```
+{project_slug}/
+├── README.md
+├── CLAUDE.md
+├── .quad/config.json
+├── documentation/
+│   ├── architecture/README.md
+│   ├── database/README.md
+│   ├── api/README.md
+│   └── ...
+└── (code repos as submodules)
+```
+
+---
+
+**Generated by QUAD**
+"""
+    claude_file = project_dir / "CLAUDE.md"
+    claude_file.write_text(claude_content)
+    Console.success(f"Created: {project_slug}/CLAUDE.md")
+
+    # Create documentation structure
+    docs_dir = project_dir / "documentation"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    for folder in DOC_FOLDERS:
+        folder_path = docs_dir / folder
+        folder_path.mkdir(parents=True, exist_ok=True)
+
+        readme_path = folder_path / "README.md"
+        readme_path.write_text(f"""# {project_name} - {folder.title()}
+
+## Overview
+
+{folder.title()} documentation for {project_name}.
+
+---
+
+*Generated by QUAD on {datetime.now().strftime('%Y-%m-%d')}*
+""")
+        Console.success(f"Created: {project_slug}/documentation/{folder}/README.md")
+
+    # Try to save to database
+    if HAS_PSYCOPG:
+        try:
+            save_project_to_db(project_config)
+            Console.success("Saved to database: quad_domains")
+        except Exception as e:
+            Console.info(f"Database save skipped: {e}")
+
+    # Show summary
+    print()
+    Console.success(f"Project initialized!")
+    Console.info(f"")
+    Console.info(f"  cd {project_slug}")
+    Console.info(f"  quad story create")
+    print()
+
+    # === HOOK INTEGRATION START ===
+    # POST-HOOK: Analyze and store context
+    try:
+        result = {
+            "project_slug": project_slug,
+            "project_name": project_name,
+            "project_type": project_type,
+            "frontend": frontend,
+            "backend": backend,
+            "database": database,
+            "org_code": org_code,
+            "org_name": org_name,
+            "config": project_config,
+            "success": True
+        }
+        hook_manager.post_hook.execute("init", command_args, result, pre_context)
+    except Exception as e:
+        print(f"  ⚠ Post-hook warning: {e}")
+    # === HOOK INTEGRATION END ===
+
+    return True
+
+
+def save_project_to_db(config: Dict):
+    """Save project to database"""
+    conn = psycopg.connect(
+        host=DB_CONFIG["host"],
+        port=DB_CONFIG["port"],
+        dbname=DB_CONFIG["dbname"],
+        user=DB_CONFIG["user"],
+        password=DB_CONFIG["password"],
+        row_factory=dict_row
+    )
+
+    with conn.cursor() as cur:
+        # Get org ID
+        cur.execute("""
+            SELECT id FROM quad_organizations WHERE slug = %s
+        """, (config['org_code'].lower(),))
+        org = cur.fetchone()
+
+        if org:
+            cur.execute("""
+                INSERT INTO quad_domains (name, slug, description, methodology, company_id, is_active)
+                VALUES (%s, %s, %s, 'quad', %s, true)
+                ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+                RETURNING id
+            """, (config['project_name'], config['domain_slug'], f"{config['project_type']} project", org['id']))
+
+            conn.commit()
+
+    conn.close()
 
 
 if __name__ == "__main__":
